@@ -15,3 +15,9 @@ def run_firefox(url):
     with webdriver.Firefox() as driver:
        return get_images_url(driver,url)
         
+def run(url,browser_name):
+    if browser_name == "chrome":
+        return run_chrome(url)
+    
+    if browser_name == "firefox":
+        return run_firefox(url)

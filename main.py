@@ -1,4 +1,3 @@
-
 import requests
 import re
 import base64
@@ -41,7 +40,7 @@ def make_url(search_query):
   
 if __name__ == "__main__":
     from utils.parser_args import parser_args
-    from utils.selenium_auto import run_chrome
+    from utils.selenium_auto import run
     args = parser_args()
     
     if args.b not in ["firefox","chrome"] :
@@ -50,26 +49,8 @@ if __name__ == "__main__":
     if args.dd == "y":    
        download_driver(args.b,args.d)
     
-    images_url = run_chrome(url=make_url(args.s))
-    '''
-    for k in range(0,20):
-        img = images_url[k]
-        if img == None:
-            continue
-        url_splited = images_url[k].split(".")
-        extension = url_splited[len(url_splited)-1]
-        
-        if img == extension:
-            print(img)
-            import re
-            regex = r'data:image/(jpeg|png|gif|svg);base64'
-            print(re.findall(regex,img)[0])
-            print("\n")
-            continue
-        
-        print(img)
-        print("\n")
-    '''    
+    images_url = run(url=make_url(args.s),browser_name=args.b)
+    
     import os
     if not os.path.exists(f"images"):
         os.mkdir("images")
