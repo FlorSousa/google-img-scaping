@@ -1,10 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 def get_images_url(driver,url):        
     driver.get(url)   
     images  = driver.find_elements(By.TAG_NAME,"img")
-    return [img.get_attribute('src') for img in images]
+    return [img.get_attribute('src') for img in filter(lambda img: int(img.get_attribute('width'))>12,images)]
     
     
 def run_chrome(url):
