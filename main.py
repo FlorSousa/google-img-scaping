@@ -57,17 +57,21 @@ if __name__ == "__main__":
     if not os.path.exists(f"images"):
         os.mkdir("images")
     
-    os.mkdir(f"images/{args.s}")
+    if not os.path.exists(f"images/{args.s}"):
+        os.mkdir(f"images/{args.s}")
        
     for index,url in enumerate(images_url):
         if url == None:
             continue
-        
-        regex_base64 = r'data:image/(jpeg|jpg|png|svg);base64'
+        file_ext = ""
+        regex_base64 = r'data:image/(jpeg|gif|jpg|png|svg);base64'
         if re.match(regex_base64, url):
             encode = url.split(",",1)[1]
             byte_img = base64.b64decode(encode)
             file_ext = re.findall(regex_base64,url)[0]
+            if file_ext == "gif":
+                continue
+            
             write_image(file_ext,byte_img)
             continue
         
@@ -77,4 +81,8 @@ if __name__ == "__main__":
             file_ext = re.findall(regex_default,url)[0]
             write_image(file_ext,byte_img)
             continue
-       
+          
+        req = requests.get(url)
+        byte_img = req.content
+        file_ext = "jpg"
+        write_image(file_ext,byte_img)

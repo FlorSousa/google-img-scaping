@@ -5,6 +5,10 @@ from selenium.webdriver.common.keys import Keys
 def get_images_url(driver,url):        
     driver.get(url)   
     images  = driver.find_elements(By.TAG_NAME,"img")
+    body  = driver.find_element(By.TAG_NAME,"body")
+    for _ in range(17):
+     body.send_keys(Keys.PAGE_DOWN)
+    
     return [img.get_attribute('src') for img in filter(lambda img: int(img.get_attribute('width'))>12,images)]
     
     
