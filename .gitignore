@@ -1,3 +1,5 @@
 __pycache__/
 chromedriver.exe
 images/
+firefox_driver/
+chrome_driver/

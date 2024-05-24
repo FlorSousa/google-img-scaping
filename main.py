@@ -1,6 +1,7 @@
 import requests
 import re
 import base64
+
 def check_os() -> str:
     import platform
     sys_name = platform.system()
@@ -20,20 +21,53 @@ def unzip(browser_name,data):
     with zipfile.ZipFile(zip_content, 'r') as zip_ref:
         zip_ref.extractall(f"{browser_name}_driver/")
 
+        
+def extract_tar(data):
+    pass
+
+def download_chrome_driver(driver_version,os_name):
+    url_to_download =  f"https://storage.googleapis.com/chrome-for-testing-public/{driver_version}/{os_name}/chromedriver-{os_name}.zip"
+    data = requests.get(url_to_download).content
+    unzip("chrome",data)
+
+def get_binary(driver_version,os_name,bits,type_compression):
+    if bits == 32:
+        url_to_download = f"https://github.com/mozilla/geckodriver/releases/download/v{driver_version}/geckodriver-v{driver_version}-{os_name}.{type_compression}"
+        return requests.get(url_to_download).content
+    
+    os_abr = re.findall(r'(win|macos|linux)',os_name)[0]
+    url_to_download = f"https://github.com/mozilla/geckodriver/releases/download/v{driver_version}/geckodriver-v{driver_version}-{os_abr}-aarch64.{type_compression}"
+    return requests.get(url_to_download).content
+
+def download_firefox_driver(driver_version,os_name):
+    bits_os_version = re.findall(r'(32|64)',os_name)[0]
+    data = None
+    type_compression = "zip" if re.match(r'win',os_name)[0] == "win" else "tar.gz"
+    data = get_binary(driver_version,os_name,bits_os_version,type_compression)
+    
+    if type_compression == "zip":
+        unzip("firefox",data)
+        return
+
+    if type_compression == "tar.gz":
+        extract_tar("firefox",data)
+        return
+       
+    
+    
 def download_driver(browser_name,driver_version):
     os_name = check_os()
     if os_name == "":
         print("Error[2]: Your OS is not supported")
         exit(2)
 
- 
+    
     urls_download = {
-        "chrome": f"https://storage.googleapis.com/chrome-for-testing-public/{driver_version}/{os_name}/chromedriver-{os_name}.zip",
-        "firefox": f":p"
+        "chrome": lambda driver_version,os_name: download_chrome_driver(driver_version,os_name),
+        "firefox": lambda driver_version,os_name :download_firefox_driver(driver_version,os_name)
     }
     
-    req = requests.get(urls_download[browser_name])
-    unzip(browser_name,req.content)
+    urls_download[browser_name](driver_version,os_name)
 
 def write_image(file_ext,data):
     name_img = f"images/{args.s}/image_{index}.{file_ext}"
