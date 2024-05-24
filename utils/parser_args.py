@@ -18,7 +18,7 @@ def parser_args():
     )
     
     parser.add_argument(
-        '-dd', type=str,help="download driver",default="y"
+        '-dd', type=str,help="download driver",default="n"
     )
     
     

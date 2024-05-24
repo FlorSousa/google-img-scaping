@@ -14,43 +14,49 @@ def check_os() -> str:
         return os_acr[sys_name]
     return ""
 
-def unzip(browser_name,data):
+def unzip(data):
     import io
     import zipfile
     zip_content = io.BytesIO(data)
     with zipfile.ZipFile(zip_content, 'r') as zip_ref:
-        zip_ref.extractall(f"{browser_name}_driver/")
+        zip_ref.extractall(".")
 
         
 def extract_tar(data):
-    pass
+    import io
+    import tarfile
+    tar_content = io.BytesIO(data)
+    with tarfile.open(fileobj=tar_content, mode='r:gz') as tar:
+        tar.extractall(".")
 
 def download_chrome_driver(driver_version,os_name):
     url_to_download =  f"https://storage.googleapis.com/chrome-for-testing-public/{driver_version}/{os_name}/chromedriver-{os_name}.zip"
     data = requests.get(url_to_download).content
-    unzip("chrome",data)
+    unzip(data)
 
-def get_binary(driver_version,os_name,bits,type_compression):
-    if bits == 32:
+def get_firefox_zip_binary(driver_version,os_name,bits,type_compression):
+    #THIS NEED TO BE CHANGE IN ANOTHER MOMENT
+    os_abr = re.findall(r'(win|macos|linux)',os_name)[0]
+    if bits == 32 or os_abr in ["win","macos"]:
         url_to_download = f"https://github.com/mozilla/geckodriver/releases/download/v{driver_version}/geckodriver-v{driver_version}-{os_name}.{type_compression}"
         return requests.get(url_to_download).content
     
-    os_abr = re.findall(r'(win|macos|linux)',os_name)[0]
-    url_to_download = f"https://github.com/mozilla/geckodriver/releases/download/v{driver_version}/geckodriver-v{driver_version}-{os_abr}-aarch64.{type_compression}"
+    
+    url_to_download = f"https://github.com/mozilla/geckodriver/releases/download/v{driver_version}/geckodriver-v{driver_version}-{os_abr}64.tar.gz"
     return requests.get(url_to_download).content
 
 def download_firefox_driver(driver_version,os_name):
     bits_os_version = re.findall(r'(32|64)',os_name)[0]
     data = None
     type_compression = "zip" if re.match(r'win',os_name)[0] == "win" else "tar.gz"
-    data = get_binary(driver_version,os_name,bits_os_version,type_compression)
+    data = get_firefox_zip_binary(driver_version,os_name,bits_os_version,type_compression)
     
     if type_compression == "zip":
-        unzip("firefox",data)
+        unzip(data)
         return
 
     if type_compression == "tar.gz":
-        extract_tar("firefox",data)
+        extract_tar(data)
         return
        
     
