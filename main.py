@@ -35,8 +35,10 @@ def download_driver(browser_name,driver_version):
     req = requests.get(urls_download[browser_name])
     unzip(browser_name,req.content)
 
-def make_url(search_query):
-    return f"https://www.google.com/search?q={search_query}&tbm=isch"
+def write_image(file_ext,data):
+    name_img = f"images/{args.s}/image_{index}.{file_ext}"
+    with open(name_img,"wb") as file:
+            file.write(data)
   
 if __name__ == "__main__":
     from utils.parser_args import parser_args
@@ -49,7 +51,7 @@ if __name__ == "__main__":
     if args.dd == "y":    
        download_driver(args.b,args.d)
     
-    images_url = run(url=make_url(args.s),browser_name=args.b)
+    images_url = run(url=f"https://www.google.com/search?q={args.s}&tbm=isch",browser_name=args.b)
     
     import os
     if not os.path.exists(f"images"):
@@ -60,21 +62,19 @@ if __name__ == "__main__":
     for index,url in enumerate(images_url):
         if url == None:
             continue
-        regex = r'data:image/(jpeg|png|gif|svg);base64'
-        if re.match(regex, url):
+        
+        regex_base64 = r'data:image/(jpeg|jpg|png|svg);base64'
+        if re.match(regex_base64, url):
             encode = url.split(",",1)[1]
             byte_img = base64.b64decode(encode)
-            file_ext = re.findall(regex,url)[0]
-        else:
-            byte_img = requests.get(url).content
-            url_splited = url.split(".")
-            file_ext = url_splited[len(url_splited)-1]
-            
-        if len(file_ext) > 4:
+            file_ext = re.findall(regex_base64,url)[0]
+            write_image(file_ext,byte_img)
             continue
-        path = f"images/{args.s}/image_{index}.{file_ext}"
         
-        with open(path,"wb") as file:
-            file.write(byte_img)
-        
+        regex_default = r'.(jpeg|jpg|png|svg)'
+        if re.match(regex_default,url):
+            byte_img = requests.get(url).content
+            file_ext = re.findall(regex_default,url)[0]
+            write_image(file_ext,byte_img)
+            continue
        
